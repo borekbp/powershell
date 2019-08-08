@@ -1,0 +1,16 @@
+$ip = "1.1.1.1"
+Write-Output $ip
+for ($i = 0; $i -lt 25; $i++)
+    {
+    $trzeci = 1, 2, 3, 4, 5, 6, 8, 9 | Get-Random
+    $xxx = $ip.Split('.')[0]+'.'+$ip.Split('.')[1]+'.'+$i+'.'+$trzeci
+        if ($trzeci -eq 1 -or $trzeci -eq 3){
+            $wynik = $xxx + ' Nieparzyste'
+            write $wynik
+        } elseif ($trzeci -eq 2 -or $trzeci -eq 3){
+            $wynik = $xxx + ' Parzyste'
+            write $wynik
+        } else {
+            write $xxx
+        }
+    }
