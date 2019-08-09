@@ -1,0 +1,109 @@
+
+#DANE WEJSCIOWE
+$podanyIP = "10.5.101.15"
+$podanyHOSTNAME = "PTw44k02328"
+$podanyMAC = "78-ac-c0-b2-46-23"
+
+#PARAMETRY POMOCNICZE
+$3octetIP = $podanyIP.Split('.')[0]+'.'+$podanyIP.Split('.')[1]+'.'+$podanyIP.Split('.')[2]+'.'
+$netwhitelist_check = 'False'
+$iprightrange_check = 'False'
+$podanyIP_ok = 'False'
+$komunikatSDMzwrotny = ''
+$serwerDHCP = 'osw00458.pzu.pl'
+$netwhitelist = ("10.3.209.0", "10.5.26.0", "10.5.100.0", "10.10.100.")
+$23bit = ("10.5.101.", "10.5.27.")
+
+
+
+function ustalscopeid
+{
+param ([string]$podanyIP)
+
+if ($23bit -contains $3octetIP){
+    #siec 23bit
+    $3octetIP = $podanyIP.Split('.')[0]+'.'+$podanyIP.Split('.')[1]+'.'+[int]($podanyIP.Split('.')[2]-1)+'.'
+    $scopeID = $3octetIP + '0'
+} else {
+    #sieci 24-bit
+    $scopeID = $3octetIP + '0'
+}
+write "1"
+write $scopeID
+}
+
+#ustal DHCP_SCOPE_ID
+ustalscopeid -podanyIP $podanyIP
+
+#USTAL CZY SCOPE JEST NA WHITE-LIST
+
+if ($netwhitelist -contains $scopeID){
+    $netwhitelist_check = 'True'
+} else {
+    $netwhitelist_check = 'False'
+    $komunikatSDMzwrotny = 'W tej podsieci nie można utworzyć rezerwacji IP automatycznie'
+}
+
+
+#USTAL KTORY SERWER DHCP
+#if  ($podanyIP.Split('.')[1] -match "^3{1}$|^4{1}$|^5{1}$|^13{1}$|^14{1}$"){ 
+#    $serwerDHCP = 'osw00458.pzu.pl'
+#} else{
+#    $serwerDHCP = 'osw00459.pzu.pl'
+#
+#}
+
+#SPRAWDZ CZY 4-OKTET JEST W ZAKRESIE PRZYDZIELANYCH IP
+if ([int]$podanyIP.Split('.')[3] -In 10..250) {
+    $iprightrange_check = 'True'
+} else {
+    $iprightrange_check = 'False'
+}
+
+
+#SPRAWDZ CZY JEST JUZ REZERWACJA
+#$IPstatic_check = Get-DhcpServerv4Reservation -ComputerName $serwerDHCP -ScopeId $scopeID -ClientId $podanyMAC
+#$3octet_IPstatic_check = $IPstatic_check.IPAddress.IPAddressToString.Split('.')[0]+'.'+$IPstatic_check.IPAddress.IPAddressToString.Split('.')[1]+'.'+$IPstatic_check.IPAddress.IPAddressToString.Split('.')[2]+'.0'
+#
+#
+#write $IPstatic_check.IPAddress.IPAddressToString
+#write "scopeid:"
+#write $scopeID
+#write "octet_IPstatic_check:"
+#write $3octet_IPstatic_check
+
+
+
+#JESLI PODANY ADRES 
+#JEST NA WHITELIST i
+#JEST W DOBRYM ZAKRESIE
+#WYKONAJ SCENARIUSZ1
+#SCENARIUSZ1: SPRAWDZ CZY ADRES IP JEST WOLNY
+
+
+if ($iprightrange_check -eq 'True' -and $netwhitelist_check -eq 'True'){
+#    $ipwolne = Get-DhcpServerv4FreeIPAddress -ComputerName $serwerDHCP -ScopeId $scopeID -StartAddress $podanyIP -EndAddress $podanyIP
+#    if ($ipwolne -eq "WARNING: The requested number of free IP addresses could not be found."){
+#    } else {
+#        write "wolne"
+#        write $ipwolne
+#    }
+$podanyIP_ok = 'True'
+write "mozna"
+} else {
+#    $ipwolne = Get-DhcpServerv4FreeIPAddress -ComputerName $serwerDHCP -ScopeId $scopeID
+write "zajete"
+#    write $ipwolne
+$podanyIP_ok = 'False'
+}
+
+
+#WARNING: The requested number of free IP addresses could not be found.
+
+write "scopeID:"
+write $scopeID
+write "netwhitelist_check:"
+write $netwhitelist_check
+#write "ipwolne:"
+#write $ipwolne
+
