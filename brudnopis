@@ -1,1 +1,2 @@
 $Error[0].Exception.GetType().FullName
+$Mac = $Mac -replace '..(?!$)', '$&-'
